@@ -3,125 +3,413 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Escape Room Boda</title>
-
+<title>Escape Room de Luna de Miel</title>
 <style>
-body {
-  margin: 0;
-  font-family: Arial;
-  background: black;
-  color: white;
-  text-align: center;
-}
+  :root{
+    --bg1:#08131b;
+    --bg2:#173247;
+    --card:rgba(10,20,30,0.88);
+    --gold:#e7d7a2;
+    --gold2:#c9a95c;
+    --text:#f5f1e8;
+    --ok:#9be79b;
+    --bad:#ff8a8a;
+  }
 
-.card {
-  display: none;
-  padding: 40px;
-}
+  *{box-sizing:border-box}
 
-.show {
-  display: block;
-}
+  body{
+    margin:0;
+    font-family: Georgia, serif;
+    color:var(--text);
+    text-align:center;
+    background:
+      radial-gradient(circle at top, rgba(255,224,130,.12), transparent 22%),
+      radial-gradient(circle at 20% 20%, rgba(255,255,255,.04), transparent 18%),
+      linear-gradient(180deg, var(--bg1), var(--bg2));
+    min-height:100vh;
+    overflow-x:hidden;
+  }
 
-button {
-  padding: 10px 20px;
-  margin-top: 10px;
-  cursor: pointer;
-}
+  .container{
+    max-width:980px;
+    margin:0 auto;
+    padding:28px 20px 70px;
+  }
 
-input {
-  padding: 10px;
-  text-align: center;
-}
+  .card{
+    display:none;
+    background:var(--card);
+    border:1px solid rgba(255,255,255,.06);
+    border-radius:24px;
+    padding:34px 28px;
+    margin-top:28px;
+    box-shadow:0 18px 50px rgba(0,0,0,.35);
+    position:relative;
+    overflow:hidden;
+  }
+
+  .show{display:block}
+
+  h1,h2{
+    color:var(--gold);
+    margin-top:0;
+  }
+
+  h1{
+    font-size:2.5rem;
+    margin-bottom:8px;
+  }
+
+  h2{
+    font-size:2rem;
+    margin-bottom:12px;
+  }
+
+  p{
+    max-width:760px;
+    margin:14px auto;
+    line-height:1.75;
+    font-size:1.05rem;
+  }
+
+  .lead{
+    opacity:.93;
+  }
+
+  .question-box{
+    max-width:700px;
+    margin:24px auto 8px;
+    padding:22px 18px;
+    border-radius:18px;
+    border:1px solid rgba(231,215,162,.16);
+    background:linear-gradient(180deg, rgba(25,38,54,.78), rgba(14,24,34,.95));
+    color:#d8e5f2;
+    line-height:1.75;
+  }
+
+  .image-wrap{
+    max-width:580px;
+    margin:28px auto 20px;
+  }
+
+  img{
+    width:100%;
+    display:block;
+    border-radius:18px;
+    box-shadow:0 14px 30px rgba(0,0,0,.35);
+  }
+
+  .input-row{
+    margin-top:18px;
+  }
+
+  input{
+    min-width:210px;
+    padding:13px 14px;
+    border:none;
+    border-radius:12px;
+    text-align:center;
+    font-size:1rem;
+  }
+
+  button{
+    padding:13px 18px;
+    margin-left:10px;
+    border:none;
+    border-radius:12px;
+    background:var(--gold2);
+    color:#1d1a14;
+    font-weight:bold;
+    cursor:pointer;
+    transition:transform .15s ease, opacity .15s ease;
+  }
+
+  button:hover{
+    transform:translateY(-1px);
+    opacity:.95;
+  }
+
+  .result{
+    min-height:1.5em;
+    margin-top:14px;
+    font-weight:bold;
+  }
+
+  .ok{color:var(--ok)}
+  .bad{color:var(--bad)}
+
+  .final-code{
+    font-size:2.6rem;
+    letter-spacing:.18em;
+    color:#f6dfa1;
+    font-weight:bold;
+    margin:10px 0 8px;
+    text-shadow:0 0 18px rgba(246,223,161,.15);
+  }
+
+  .celebration{
+    background:
+      radial-gradient(circle at top, rgba(255,224,130,.16), transparent 24%),
+      radial-gradient(circle at 30% 0%, rgba(255,255,255,.06), transparent 16%),
+      linear-gradient(180deg, #14293a, #1d3f55 60%, #234d64);
+  }
+
+  .celebration h2{
+    font-size:2.3rem;
+  }
+
+  .final-photo-wrap{
+    position:relative;
+    max-width:620px;
+    margin:24px auto 0;
+    padding:14px;
+    border-radius:26px;
+    background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+    box-shadow:0 20px 60px rgba(0,0,0,.35);
+  }
+
+  .final-photo-wrap img{
+    border-radius:20px;
+  }
+
+  #rain{
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    overflow:hidden;
+    border-radius:26px;
+  }
+
+  #rain span{
+    position:absolute;
+    top:-40px;
+    font-size:28px;
+    animation-name:fall;
+    animation-timing-function:linear;
+    animation-iteration-count:infinite;
+    text-shadow:0 0 10px rgba(255,255,255,.18);
+  }
+
+  @keyframes fall{
+    from{
+      transform:translateY(-50px) rotate(0deg);
+      opacity:0;
+    }
+    10%{
+      opacity:1;
+    }
+    to{
+      transform:translateY(820px) rotate(24deg);
+      opacity:0;
+    }
+  }
+
+  .small-note{
+    opacity:.88;
+    font-size:.95rem;
+  }
+
+  @media (max-width:700px){
+    .card{padding:24px 18px}
+    h1{font-size:2rem}
+    h2{font-size:1.6rem}
+    .input-row{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      align-items:center;
+    }
+    button{
+      margin-left:0;
+      width:210px;
+    }
+  }
 </style>
 </head>
-
 <body>
 
-<div id="intro" class="card show">
-  <h1>🌍 Escape Room de Luna de Miel</h1>
-  <p>Resuelve los enigmas y descubre el código final</p>
-  <button onclick="start()">Empezar</button>
-</div>
+<div class="container">
 
-<div id="p1" class="card">
-  <h2>New York</h2>
-  <p>Rascacielos - Presidentes</p>
-  <input id="r1">
-  <br>
-  <button onclick="c1()">Comprobar</button>
-</div>
+  <div id="intro" class="card show">
+    <h1>🌍 Escape Room de Luna de Miel</h1>
+    <p class="lead">Dos destinos, dos mundos… y una historia que apenas comienza.</p>
+    <p>Vuestra luna de miel no será solo un viaje, sino una aventura. Una búsqueda. Un pequeño desafío antes del gran tesoro.</p>
+    <p>Desde los rascacielos de Nueva York hasta los misterios ocultos en México, cada paso os acercará al premio final.</p>
+    <p>Pero no será fácil… Tendréis que pensar, investigar y confiar el uno en el otro.</p>
+    <p>Solo quienes resuelvan todos los enigmas descubrirán el código que abre el cofre.</p>
+    <button onclick="startGame()">Comenzar la aventura</button>
+    <p class="small-note">La música empieza al pulsar este botón.</p>
+  </div>
 
-<div id="p2" class="card">
-  <h2>Cenote</h2>
-  <p>¿Cuántos sacrificios?</p>
-  <input id="r2">
-  <br>
-  <button onclick="c2()">Comprobar</button>
-</div>
+  <div id="p1" class="card">
+    <h2>Las alturas de Nueva York</h2>
+    <p>Vuestro viaje comienza en una ciudad que nunca duerme, donde el acero toca el cielo y cada edificio parece desafiar la gravedad.</p>
+    <p>Entre luces, ruido y vértigo, se esconde vuestro primer número.</p>
+    <p>No basta con mirar… tendréis que investigar.</p>
 
-<div id="p3" class="card">
-  <h2>Padel</h2>
-  <img src="padel.jpg" width="300">
-  <p>¿Cuántos partidos ganados?</p>
-  <input id="r3">
-  <br>
-  <button onclick="c3()">Comprobar</button>
-</div>
+    <div class="question-box">
+      Tomad el número de rascacielos de la ciudad y restadle el número de presidentes que han pasado por la Casa Blanca en toda la historia.
+    </div>
 
-<div id="final" class="card">
-  <h2>Código final</h2>
-  <input id="code">
-  <br>
-  <button onclick="openChest()">Abrir</button>
-</div>
+    <div class="input-row">
+      <input id="r1" placeholder="Número">
+      <button onclick="c1()">Comprobar</button>
+    </div>
+    <div id="res1" class="result"></div>
+  </div>
 
-<div id="win" class="card">
-  <h1>💶 TESORO 💶</h1>
-  <img src="couple.jpg" width="300">
+  <div id="p2" class="card">
+    <h2>El susurro del cenote</h2>
+    <p>Tras las alturas, vuestro viaje os llevará hasta las aguas turquesas de Cancún. Pero antes de descansar… escuchad la voz del agua.</p>
+    <p>Allí donde los antiguos mayas hablaban con los dioses, existe un lugar sagrado en Chichén Itzá donde el agua lo guarda todo.</p>
+    <p>No contéis los días, ni las playas… contad los sacrificios que hubo en ese lugar.</p>
+    <p>¿Cuántas almas se llevó el agua para devolverlas en forma de lluvia?</p>
+
+    <div class="input-row">
+      <input id="r2" placeholder="Número">
+      <button onclick="c2()">Comprobar</button>
+    </div>
+    <div id="res2" class="result"></div>
+  </div>
+
+  <div id="p3" class="card">
+    <h2>Los maestros del pádel</h2>
+    <p>Pero no todas las leyendas se encuentran en templos antiguos o ciudades lejanas… Algunas se forjan mucho más cerca.</p>
+    <p>Dos hombres. Dos suegros. Dos competidores incansables. Durante años han luchado en la pista, compartiendo victorias, derrotas y alguna que otra batalla épica.</p>
+    <p>No importa cuántos partidos jugaron… solo importa cuántas veces lograron imponerse juntos.</p>
+
+    <div class="image-wrap">
+      <img src="padel.jpg" alt="Francis y Beni jugando al pádel">
+    </div>
+
+    <p>¿Cuántos partidos de pádel han ganado Francis y Beni jugando como pareja?</p>
+
+    <div class="input-row">
+      <input id="r3" placeholder="Número">
+      <button onclick="c3()">Comprobar</button>
+    </div>
+    <div id="res3" class="result"></div>
+  </div>
+
+  <div id="final" class="card">
+    <h2>🎉 Habéis reunido todas las pistas</h2>
+    <p>Ahora introducid el código final <strong>(primero - segundo - tercero)</strong> para abrir el cofre.</p>
+
+    <div class="input-row">
+      <input id="code" placeholder="Código final">
+      <button onclick="openChest()">Abrir cofre</button>
+    </div>
+
+    <div id="finalResult" class="result"></div>
+
+    <div id="chestBox" class="hidden" style="margin-top:22px;">
+      <h2>🔓 El cofre se ha abierto</h2>
+      <div class="final-code">147</div>
+      <p>💶 El tesoro es vuestro 💶</p>
+    </div>
+  </div>
+
+  <div id="win" class="card celebration">
+    <h2>💍 El verdadero tesoro</h2>
+    <p>Después de todos los desafíos... lo importante es esto.</p>
+
+    <div class="final-photo-wrap">
+      <img src="couple.jpg" alt="Los novios">
+      <div id="rain"></div>
+    </div>
+
+    <p style="margin-top:18px; font-size:1.22rem; color:#ffe6a7; font-weight:bold;">
+      💶 Que nunca os falte amor… ni aventuras 💶
+    </p>
+  </div>
+
 </div>
 
 <audio id="music" src="inicio.mp3" loop></audio>
 <audio id="music2" src="final.mp3"></audio>
 
 <script>
+let rainInterval = null;
 
-function start(){
-  document.getElementById("intro").classList.remove("show")
-  document.getElementById("p1").classList.add("show")
-  document.getElementById("music").play()
+function show(id){
+  document.getElementById(id).classList.add("show");
+}
+function hide(id){
+  document.getElementById(id).classList.remove("show");
+}
+function setResult(id, ok, okText='✔ Correcto', badText='✖ Incorrecto'){
+  const el = document.getElementById(id);
+  el.textContent = ok ? okText : badText;
+  el.className = 'result ' + (ok ? 'ok' : 'bad');
+}
+
+function startGame(){
+  hide("intro");
+  show("p1");
+
+  const music = document.getElementById("music");
+  music.volume = 0.22;
+  music.currentTime = 0;
+  music.play().catch(()=>{});
 }
 
 function c1(){
-  if(document.getElementById("r1").value == "279"){
-    document.getElementById("p1").classList.remove("show")
-    document.getElementById("p2").classList.add("show")
-  } else alert("Incorrecto")
+  const ok = document.getElementById("r1").value.trim() === "279";
+  setResult("res1", ok);
+  if(ok) show("p2");
 }
 
 function c2(){
-  if(document.getElementById("r2").value == "127"){
-    document.getElementById("p2").classList.remove("show")
-    document.getElementById("p3").classList.add("show")
-  } else alert("Incorrecto")
+  const ok = document.getElementById("r2").value.trim() === "127";
+  setResult("res2", ok);
+  if(ok) show("p3");
 }
 
 function c3(){
-  if(document.getElementById("r3").value == "5"){
-    document.getElementById("p3").classList.remove("show")
-    document.getElementById("final").classList.add("show")
-  } else alert("Incorrecto")
+  const ok = document.getElementById("r3").value.trim() === "5";
+  setResult("res3", ok);
+  if(ok) show("final");
+}
+
+function addBill(){
+  const rain = document.getElementById("rain");
+  const s = document.createElement("span");
+  s.textContent = "💶";
+  s.style.left = (Math.random()*100) + "%";
+  s.style.animationDuration = (1.8 + Math.random()*2.5) + "s";
+  s.style.fontSize = (22 + Math.random()*16) + "px";
+  rain.appendChild(s);
+  setTimeout(()=>s.remove(), 5500);
+}
+
+function startInfiniteRain(){
+  if(rainInterval) return;
+  for(let i=0;i<20;i++){
+    setTimeout(addBill, i*180);
+  }
+  rainInterval = setInterval(addBill, 220);
 }
 
 function openChest(){
-  if(document.getElementById("code").value == "147"){
-    document.getElementById("final").classList.remove("show")
-    document.getElementById("win").classList.add("show")
-    document.getElementById("music").pause()
-    document.getElementById("music2").play()
-  } else alert("Código incorrecto")
-}
+  const code = document.getElementById("code").value.trim();
+  const music = document.getElementById("music");
+  const music2 = document.getElementById("music2");
 
+  if(code === "147"){
+    setResult("finalResult", true, "✔ Código correcto");
+    document.getElementById("chestBox").classList.remove("hidden");
+    show("win");
+    startInfiniteRain();
+
+    music.pause();
+    music2.volume = 0.7;
+    music2.currentTime = 0;
+    music2.play().catch(()=>{});
+  } else {
+    setResult("finalResult", false, "✔ Código correcto", "✖ Código incorrecto");
+  }
+}
 </script>
 
 </body>
