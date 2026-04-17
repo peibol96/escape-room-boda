@@ -1,13 +1,128 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>Escape Room Boda</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Escape Room Boda</title>
+
+<style>
+body {
+  margin: 0;
+  font-family: Arial;
+  background: black;
+  color: white;
+  text-align: center;
+}
+
+.card {
+  display: none;
+  padding: 40px;
+}
+
+.show {
+  display: block;
+}
+
+button {
+  padding: 10px 20px;
+  margin-top: 10px;
+  cursor: pointer;
+}
+
+input {
+  padding: 10px;
+  text-align: center;
+}
+</style>
 </head>
-<body style="background:black; color:white; text-align:center; font-family:Arial; padding:50px;">
-  
-  <h1>💍 Escape Room de Boda 💍</h1>
-  <p>Si estás viendo esto… FUNCIONA 🎉</p>
+
+<body>
+
+<div id="intro" class="card show">
+  <h1>🌍 Escape Room de Luna de Miel</h1>
+  <p>Resuelve los enigmas y descubre el código final</p>
+  <button onclick="start()">Empezar</button>
+</div>
+
+<div id="p1" class="card">
+  <h2>New York</h2>
+  <p>Rascacielos - Presidentes</p>
+  <input id="r1">
+  <br>
+  <button onclick="c1()">Comprobar</button>
+</div>
+
+<div id="p2" class="card">
+  <h2>Cenote</h2>
+  <p>¿Cuántos sacrificios?</p>
+  <input id="r2">
+  <br>
+  <button onclick="c2()">Comprobar</button>
+</div>
+
+<div id="p3" class="card">
+  <h2>Padel</h2>
+  <img src="padel.jpg" width="300">
+  <p>¿Cuántos partidos ganados?</p>
+  <input id="r3">
+  <br>
+  <button onclick="c3()">Comprobar</button>
+</div>
+
+<div id="final" class="card">
+  <h2>Código final</h2>
+  <input id="code">
+  <br>
+  <button onclick="openChest()">Abrir</button>
+</div>
+
+<div id="win" class="card">
+  <h1>💶 TESORO 💶</h1>
+  <img src="couple.jpg" width="300">
+</div>
+
+<audio id="music" src="inicio.mp3" loop></audio>
+<audio id="music2" src="final.mp3"></audio>
+
+<script>
+
+function start(){
+  document.getElementById("intro").classList.remove("show")
+  document.getElementById("p1").classList.add("show")
+  document.getElementById("music").play()
+}
+
+function c1(){
+  if(document.getElementById("r1").value == "279"){
+    document.getElementById("p1").classList.remove("show")
+    document.getElementById("p2").classList.add("show")
+  } else alert("Incorrecto")
+}
+
+function c2(){
+  if(document.getElementById("r2").value == "127"){
+    document.getElementById("p2").classList.remove("show")
+    document.getElementById("p3").classList.add("show")
+  } else alert("Incorrecto")
+}
+
+function c3(){
+  if(document.getElementById("r3").value == "5"){
+    document.getElementById("p3").classList.remove("show")
+    document.getElementById("final").classList.add("show")
+  } else alert("Incorrecto")
+}
+
+function openChest(){
+  if(document.getElementById("code").value == "147"){
+    document.getElementById("final").classList.remove("show")
+    document.getElementById("win").classList.add("show")
+    document.getElementById("music").pause()
+    document.getElementById("music2").play()
+  } else alert("Código incorrecto")
+}
+
+</script>
 
 </body>
 </html>
