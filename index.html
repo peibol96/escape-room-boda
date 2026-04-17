@@ -1,252 +1,603 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Escape Room</title>
-
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Escape Room de Luna de Miel</title>
 <style>
-body{
-  margin:0;
-  font-family: 'Georgia', serif;
-  background: radial-gradient(circle at top,#102635,#000);
-  color:white;
-  overflow:hidden;
-}
+  :root{
+    --bg1:#09131b;
+    --bg2:#173247;
+    --panel:rgba(8,16,24,.86);
+    --gold:#ead8a0;
+    --gold2:#c9a95c;
+    --text:#f7f2e8;
+    --ok:#9be79b;
+    --bad:#ff9b9b;
+  }
 
-.screen{
-  position:absolute;
-  width:100%;
-  height:100%;
-  display:none;
-  justify-content:center;
-  align-items:center;
-  flex-direction:column;
-  text-align:center;
-  padding:20px;
-  animation:fade 1s;
-}
+  *{box-sizing:border-box}
 
-.show{display:flex;}
+  body{
+    margin:0;
+    min-height:100vh;
+    overflow:hidden;
+    font-family: Georgia, serif;
+    color:var(--text);
+    background:
+      radial-gradient(circle at top, rgba(255,224,130,.11), transparent 24%),
+      radial-gradient(circle at 20% 10%, rgba(255,255,255,.04), transparent 18%),
+      linear-gradient(180deg,var(--bg1),var(--bg2));
+  }
 
-@keyframes fade{
-  from{opacity:0; transform:scale(.95)}
-  to{opacity:1}
-}
+  .screen{
+    position:fixed;
+    inset:0;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    padding:24px;
+  }
 
-h1,h2{
-  text-shadow:0 0 20px rgba(255,215,0,0.3);
-}
+  .screen.active{
+    display:flex;
+    animation:fadeIn .6s ease;
+  }
 
-button,input{
-  padding:12px;
-  margin-top:12px;
-  border-radius:10px;
-}
+  @keyframes fadeIn{
+    from{opacity:0; transform:scale(.985)}
+    to{opacity:1; transform:scale(1)}
+  }
 
-img{
-  max-width:85%;
-  border-radius:20px;
-}
+  .panel{
+    width:min(900px, 100%);
+    max-height:92vh;
+    overflow:auto;
+    background:var(--panel);
+    border:1px solid rgba(255,255,255,.06);
+    border-radius:26px;
+    padding:34px 26px;
+    text-align:center;
+    box-shadow:0 20px 60px rgba(0,0,0,.38);
+    position:relative;
+  }
 
-/* COFRE */
-#chest{
-  font-size:120px;
-  animation:glow 1s infinite alternate;
-}
+  h1,h2{
+    color:var(--gold);
+    margin-top:0;
+    text-shadow:0 0 20px rgba(234,216,160,.10);
+  }
 
-@keyframes glow{
-  from{filter:drop-shadow(0 0 10px gold)}
-  to{filter:drop-shadow(0 0 60px gold)}
-}
+  h1{
+    font-size:2.5rem;
+    margin-bottom:10px;
+  }
 
-/* FLASH */
-#flash{
-  position:absolute;
-  width:100%;
-  height:100%;
-  background:white;
-  opacity:0;
-  pointer-events:none;
-}
+  h2{
+    font-size:2rem;
+    margin-bottom:14px;
+  }
 
-/* PARTICULAS */
-.p{
-  position:absolute;
-  background:gold;
-  width:6px;
-  height:6px;
-  border-radius:50%;
-  animation:explode 1s forwards;
-}
+  p{
+    line-height:1.8;
+    margin:14px auto;
+    max-width:720px;
+    font-size:1.05rem;
+  }
 
-@keyframes explode{
-  to{
-    transform:translate(var(--x),var(--y));
+  .question-box{
+    max-width:720px;
+    margin:24px auto 10px;
+    padding:22px 18px;
+    border-radius:18px;
+    border:1px solid rgba(234,216,160,.16);
+    background:linear-gradient(180deg, rgba(25,38,55,.82), rgba(12,24,35,.95));
+    color:#d8e3ef;
+  }
+
+  .image-wrap{
+    max-width:620px;
+    margin:24px auto;
+  }
+
+  img{
+    width:100%;
+    display:block;
+    border-radius:20px;
+    box-shadow:0 14px 32px rgba(0,0,0,.35);
+  }
+
+  .input-row{
+    margin-top:20px;
+  }
+
+  input{
+    width:min(240px, 80%);
+    padding:13px 14px;
+    border:none;
+    border-radius:12px;
+    font-size:1rem;
+    text-align:center;
+  }
+
+  button{
+    padding:13px 18px;
+    margin-left:10px;
+    border:none;
+    border-radius:12px;
+    background:var(--gold2);
+    color:#1d1a14;
+    font-weight:bold;
+    cursor:pointer;
+    transition:transform .15s ease, opacity .15s ease;
+  }
+
+  button:hover{
+    transform:translateY(-1px);
+    opacity:.95;
+  }
+
+  .result{
+    min-height:1.4em;
+    margin-top:14px;
+    font-weight:bold;
+  }
+
+  .ok{color:var(--ok)}
+  .bad{color:var(--bad)}
+
+  .small{
+    opacity:.88;
+    font-size:.95rem;
+  }
+
+  /* Cofre */
+  .chest-stage{
+    position:relative;
+    width:100%;
+    height:300px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    overflow:hidden;
+  }
+
+  .chest-glow{
+    position:absolute;
+    width:220px;
+    height:220px;
+    border-radius:50%;
+    background:radial-gradient(circle, rgba(255,221,130,.55), rgba(255,221,130,.12), transparent 70%);
+    filter:blur(8px);
+    animation:glowPulse 1.5s infinite alternate;
+  }
+
+  @keyframes glowPulse{
+    from{transform:scale(0.95); opacity:.75}
+    to{transform:scale(1.15); opacity:1}
+  }
+
+  .chest{
+    position:relative;
+    width:220px;
+    height:170px;
+  }
+
+  .chest-base{
+    position:absolute;
+    left:0;
+    bottom:0;
+    width:100%;
+    height:95px;
+    background:linear-gradient(180deg,#805220,#4b2c10);
+    border:6px solid #d4af37;
+    border-radius:0 0 24px 24px;
+    box-shadow:0 10px 24px rgba(0,0,0,.3);
+  }
+
+  .chest-lid{
+    position:absolute;
+    left:0;
+    top:20px;
+    width:100%;
+    height:72px;
+    background:linear-gradient(180deg,#966128,#5d3815);
+    border:6px solid #d4af37;
+    border-bottom:none;
+    border-radius:120px 120px 14px 14px;
+    transform-origin:bottom center;
+    transition:transform 1.1s ease;
+  }
+
+  .chest-lock{
+    position:absolute;
+    left:50%;
+    top:86px;
+    transform:translateX(-50%);
+    width:30px;
+    height:38px;
+    background:#d4af37;
+    border-radius:8px;
+    z-index:3;
+    transition:opacity .5s ease;
+  }
+
+  .chest-lock::before{
+    content:"";
+    position:absolute;
+    left:50%;
+    top:-15px;
+    transform:translateX(-50%);
+    width:18px;
+    height:16px;
+    border:4px solid #d4af37;
+    border-bottom:none;
+    border-radius:18px 18px 0 0;
+  }
+
+  .chest.open .chest-lid{
+    transform:rotateX(-125deg);
+  }
+
+  .chest.open .chest-lock{
     opacity:0;
   }
-}
 
-/* FUEGOS */
-.f{
-  position:absolute;
-  width:5px;
-  height:5px;
-  background:white;
-  border-radius:50%;
-  animation:boom 1s forwards;
-}
-
-@keyframes boom{
-  to{
-    transform:translate(var(--x),var(--y));
+  .flash{
+    position:fixed;
+    inset:0;
+    background:white;
     opacity:0;
+    pointer-events:none;
   }
-}
 
-/* LLUVIA */
-#rain span{
-  position:absolute;
-  top:-40px;
-  font-size:30px;
-  animation:fall linear infinite;
-}
+  .flash.on{
+    animation:flashAnim .45s ease;
+  }
 
-@keyframes fall{
-  to{transform:translateY(1000px);opacity:0}
-}
+  @keyframes flashAnim{
+    0%{opacity:0}
+    30%{opacity:.9}
+    100%{opacity:0}
+  }
 
+  /* Partículas y fuegos */
+  .fx-wrap{
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    overflow:hidden;
+  }
+
+  .particle{
+    position:absolute;
+    width:8px;
+    height:8px;
+    border-radius:50%;
+    background:gold;
+    box-shadow:0 0 12px rgba(255,215,0,.6);
+    animation:explode 1s forwards ease-out;
+  }
+
+  .firework{
+    position:absolute;
+    width:6px;
+    height:6px;
+    border-radius:50%;
+    background:white;
+    animation:explode 1.1s forwards ease-out;
+  }
+
+  @keyframes explode{
+    to{
+      transform:translate(var(--x), var(--y)) scale(.2);
+      opacity:0;
+    }
+  }
+
+  /* Pantalla final */
+  .celebration{
+    background:
+      radial-gradient(circle at top, rgba(255,224,130,.18), transparent 24%),
+      radial-gradient(circle at 20% 0%, rgba(255,255,255,.06), transparent 18%),
+      linear-gradient(180deg,#142a39,#1d4158 65%, #28556f);
+  }
+
+  .final-photo-wrap{
+    position:relative;
+    max-width:680px;
+    margin:24px auto 0;
+    padding:14px;
+    border-radius:28px;
+    background:linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
+    box-shadow:0 22px 60px rgba(0,0,0,.36);
+  }
+
+  #rain{
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    overflow:hidden;
+    border-radius:28px;
+  }
+
+  #rain span{
+    position:absolute;
+    top:-60px;
+    font-size:28px;
+    animation-name:fall;
+    animation-timing-function:linear;
+    animation-iteration-count:infinite;
+    text-shadow:0 0 10px rgba(255,255,255,.16);
+  }
+
+  @keyframes fall{
+    from{transform:translateY(-60px) rotate(0deg); opacity:0}
+    10%{opacity:1}
+    to{transform:translateY(920px) rotate(24deg); opacity:0}
+  }
+
+  .final-title{
+    font-size:2.4rem;
+    color:#ffe7aa;
+  }
+
+  @media (max-width:700px){
+    .panel{
+      padding:24px 18px;
+    }
+    h1{font-size:2rem}
+    h2{font-size:1.65rem}
+    .input-row{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      align-items:center;
+    }
+    button{
+      margin-left:0;
+      width:min(240px, 80%);
+    }
+    .chest-stage{
+      height:240px;
+    }
+  }
 </style>
 </head>
-
 <body>
 
-<div id="flash"></div>
+<div id="flash" class="flash"></div>
+<div id="fx" class="fx-wrap"></div>
 
-<div id="s0" class="screen show">
-<h1>🌍 Escape Room</h1>
-<p>Una aventura comienza…</p>
-<button onclick="start()">Comenzar</button>
-</div>
+<section id="intro" class="screen active">
+  <div class="panel">
+    <h1>🌍 Escape Room de Luna de Miel</h1>
+    <p>Dos destinos, dos mundos… y una historia que apenas comienza.</p>
+    <p>Vuestra luna de miel no será solo un viaje, sino una aventura. Una búsqueda. Un pequeño desafío antes del gran tesoro.</p>
+    <p>Desde los rascacielos de Nueva York hasta los misterios ocultos en México, cada paso os acercará al premio final.</p>
+    <p>Pero no será fácil… Tendréis que pensar, investigar y confiar el uno en el otro.</p>
+    <p>Solo quienes resuelvan todos los enigmas descubrirán el código que abre el cofre.</p>
+    <button onclick="startGame()">Comenzar la aventura</button>
+  </div>
+</section>
 
-<div id="s1" class="screen">
-<h2>Nueva York</h2>
-<p>Rascacielos - Presidentes</p>
-<input id="r1">
-<button onclick="c1()">OK</button>
-</div>
+<section id="screen1" class="screen">
+  <div class="panel">
+    <h2>Las alturas de Nueva York</h2>
+    <p>Vuestro viaje comienza en una ciudad que nunca duerme, donde el acero toca el cielo y cada edificio parece desafiar la gravedad.</p>
+    <p>Entre luces, ruido y vértigo, se esconde vuestro primer número.</p>
+    <p>No basta con mirar… tendréis que investigar.</p>
+    <div class="question-box">
+      Tomad el número de rascacielos de la ciudad y restadle el número de presidentes que han pasado por la Casa Blanca en toda la historia.
+    </div>
+    <div class="input-row">
+      <input id="r1" placeholder="Número">
+      <button onclick="checkOne()">Comprobar</button>
+    </div>
+    <div id="res1" class="result"></div>
+  </div>
+</section>
 
-<div id="s2" class="screen">
-<h2>El agua lo recuerda</h2>
-<p>¿Cuántas almas se llevó?</p>
-<input id="r2">
-<button onclick="c2()">OK</button>
-</div>
+<section id="screen2" class="screen">
+  <div class="panel">
+    <h2>El agua lo recuerda</h2>
+    <p>Tras las alturas, vuestro viaje os llevará hasta unas aguas sagradas.</p>
+    <p>En ese lugar, el agua fue testigo de antiguos rituales y sacrificios.</p>
+    <p>Allí se ofrecían vidas… para que la lluvia regresara.</p>
+    <div class="question-box">
+      ¿Cuántas almas se llevó el agua?
+    </div>
+    <div class="input-row">
+      <input id="r2" placeholder="Número">
+      <button onclick="checkTwo()">Comprobar</button>
+    </div>
+    <div id="res2" class="result"></div>
+  </div>
+</section>
 
-<div id="s3" class="screen">
-<img src="padel.jpg">
-<p>¿Partidos ganados?</p>
-<input id="r3">
-<button onclick="c3()">OK</button>
-</div>
+<section id="screen3" class="screen">
+  <div class="panel">
+    <h2>Los maestros del pádel</h2>
+    <p>Pero no todas las leyendas se encuentran en templos antiguos o ciudades lejanas… Algunas se forjan mucho más cerca.</p>
+    <p>Dos hombres. Dos suegros. Dos competidores incansables. Durante años han luchado en la pista, compartiendo victorias, derrotas y alguna que otra batalla épica.</p>
+    <p>No importa cuántos partidos jugaron… solo importa cuántas veces lograron imponerse juntos.</p>
 
-<div id="s4" class="screen">
-<h2>Código final</h2>
-<input id="code">
-<button onclick="openChest()">Abrir</button>
-</div>
+    <div class="image-wrap">
+      <img src="padel.jpg" alt="Francis y Beni jugando al pádel">
+    </div>
 
-<div id="s5" class="screen">
-<div id="chest">🧰</div>
-<p>Abriendo el tesoro…</p>
-</div>
+    <p>¿Cuántos partidos de pádel han ganado Francis y Beni jugando como pareja?</p>
+    <div class="input-row">
+      <input id="r3" placeholder="Número">
+      <button onclick="checkThree()">Comprobar</button>
+    </div>
+    <div id="res3" class="result"></div>
+  </div>
+</section>
 
-<div id="s6" class="screen">
-<img src="couple.jpg">
-<div id="rain"></div>
-<h2>💶 EL TESORO ES VUESTRO 💶</h2>
-</div>
+<section id="screen4" class="screen">
+  <div class="panel">
+    <h2>🎉 Habéis reunido todas las pistas</h2>
+    <p>Ahora solo queda unirlo todo.</p>
+    <p><strong>Primero - segundo - tercero</strong></p>
+    <div class="input-row">
+      <input id="code" placeholder="Código final">
+      <button onclick="openChest()">Abrir cofre</button>
+    </div>
+    <div id="finalResult" class="result"></div>
+  </div>
+</section>
+
+<section id="screen5" class="screen">
+  <div class="panel">
+    <h2>🔐 El cofre responde…</h2>
+    <div class="chest-stage">
+      <div class="chest-glow"></div>
+      <div id="chest" class="chest">
+        <div class="chest-lid"></div>
+        <div class="chest-base"></div>
+        <div class="chest-lock"></div>
+      </div>
+    </div>
+    <p>La luz se derrama… y el tesoro se revela.</p>
+  </div>
+</section>
+
+<section id="screen6" class="screen">
+  <div class="panel celebration">
+    <h2 class="final-title">💍 El verdadero tesoro</h2>
+    <p>Después de todos los desafíos... lo importante es esto.</p>
+
+    <div class="final-photo-wrap">
+      <img src="couple.jpg" alt="Los novios">
+      <div id="rain"></div>
+    </div>
+
+    <p style="margin-top:18px; font-size:1.22rem; color:#ffe6a7; font-weight:bold;">
+      💶 Que nunca os falte amor… ni aventuras 💶
+    </p>
+  </div>
+</section>
 
 <audio id="music" src="inicio.mp3" loop></audio>
 <audio id="music2" src="final.mp3"></audio>
-<audio id="open" src="cofre.mp3"></audio>
 
 <script>
+  let rainInterval = null;
 
-function go(n){
- document.querySelectorAll(".screen").forEach(s=>s.classList.remove("show"))
- document.getElementById("s"+n).classList.add("show")
-}
+  function goTo(id){
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
 
-function start(){
- go(1)
- music.play()
-}
+  function setResult(id, ok, okText='✔ Correcto', badText='✖ Incorrecto'){
+    const el = document.getElementById(id);
+    el.textContent = ok ? okText : badText;
+    el.className = 'result ' + (ok ? 'ok' : 'bad');
+  }
 
-function c1(){ if(r1.value==279) go(2) }
-function c2(){ if(r2.value==127) go(3) }
-function c3(){ if(r3.value==5) go(4) }
+  function startGame(){
+    goTo('screen1');
+    const music = document.getElementById('music');
+    music.volume = 0.22;
+    music.currentTime = 0;
+    music.play().catch(() => {});
+  }
 
-function openChest(){
- if(code.value==147){
-   go(5)
-   music.pause()
-   music2.play()
-   open.play()
-   flash()
-   explosion()
+  function checkOne(){
+    const ok = document.getElementById('r1').value.trim() === '279';
+    setResult('res1', ok);
+    if(ok){
+      setTimeout(() => goTo('screen2'), 450);
+    }
+  }
 
-   setTimeout(()=>{
-     go(6)
-     rain()
-   },2000)
- }
-}
+  function checkTwo(){
+    const ok = document.getElementById('r2').value.trim() === '127';
+    setResult('res2', ok);
+    if(ok){
+      setTimeout(() => goTo('screen3'), 450);
+    }
+  }
 
-function flash(){
- let f=document.getElementById("flash")
- f.style.opacity=1
- setTimeout(()=>f.style.opacity=0,300)
-}
+  function checkThree(){
+    const ok = document.getElementById('r3').value.trim() === '5';
+    setResult('res3', ok);
+    if(ok){
+      setTimeout(() => goTo('screen4'), 450);
+    }
+  }
 
-function explosion(){
- for(let i=0;i<80;i++){
-   let p=document.createElement("div")
-   p.className="p"
-   p.style.left="50%"
-   p.style.top="50%"
-   p.style.setProperty("--x",(Math.random()*600-300)+"px")
-   p.style.setProperty("--y",(Math.random()*600-300)+"px")
-   document.body.appendChild(p)
-   setTimeout(()=>p.remove(),1000)
- }
- fireworks()
-}
+  function spawnParticles(count, cls, spreadX, spreadY){
+    const fx = document.getElementById('fx');
+    for(let i=0;i<count;i++){
+      const el = document.createElement('div');
+      el.className = cls;
+      el.style.left = '50%';
+      el.style.top = '50%';
+      el.style.setProperty('--x', (Math.random()*spreadX - spreadX/2) + 'px');
+      el.style.setProperty('--y', (Math.random()*spreadY - spreadY/2) + 'px');
+      fx.appendChild(el);
+      setTimeout(() => el.remove(), 1200);
+    }
+  }
 
-function fireworks(){
- for(let i=0;i<50;i++){
-   let f=document.createElement("div")
-   f.className="f"
-   f.style.left="50%"
-   f.style.top="50%"
-   f.style.setProperty("--x",(Math.random()*800-400)+"px")
-   f.style.setProperty("--y",(Math.random()*800-400)+"px")
-   document.body.appendChild(f)
-   setTimeout(()=>f.remove(),1000)
- }
-}
+  function flash(){
+    const f = document.getElementById('flash');
+    f.classList.remove('on');
+    void f.offsetWidth;
+    f.classList.add('on');
+  }
 
-function rain(){
- setInterval(()=>{
-   let s=document.createElement("span")
-   s.innerHTML="💶"
-   s.style.left=Math.random()*100+"%"
-   s.style.animationDuration=(1+Math.random()*2)+"s"
-   document.getElementById("rain").appendChild(s)
-   setTimeout(()=>s.remove(),3000)
- },200)
-}
+  function addBill(){
+    const rain = document.getElementById('rain');
+    const s = document.createElement('span');
+    s.textContent = '💶';
+    s.style.left = (Math.random() * 100) + '%';
+    s.style.animationDuration = (1.8 + Math.random() * 2.5) + 's';
+    s.style.fontSize = (22 + Math.random() * 16) + 'px';
+    rain.appendChild(s);
+    setTimeout(() => s.remove(), 6000);
+  }
 
+  function startInfiniteRain(){
+    if(rainInterval) return;
+    for(let i=0;i<20;i++){
+      setTimeout(addBill, i * 170);
+    }
+    rainInterval = setInterval(addBill, 220);
+  }
+
+  function openChest(){
+    const code = document.getElementById('code').value.trim();
+    if(code !== '147'){
+      setResult('finalResult', false, '✔ Código correcto', '✖ Código incorrecto');
+      return;
+    }
+
+    setResult('finalResult', true, '✔ Código correcto');
+    goTo('screen5');
+
+    const music = document.getElementById('music');
+    const music2 = document.getElementById('music2');
+    const chest = document.getElementById('chest');
+
+    setTimeout(() => {
+      chest.classList.add('open');
+      flash();
+      spawnParticles(80, 'particle', 700, 700);
+      spawnParticles(55, 'firework', 900, 900);
+    }, 500);
+
+    setTimeout(() => {
+      music.pause();
+      music2.volume = 0.7;
+      music2.currentTime = 0;
+      music2.play().catch(() => {});
+      goTo('screen6');
+      startInfiniteRain();
+    }, 2200);
+  }
 </script>
 
 </body>
