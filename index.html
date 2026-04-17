@@ -146,11 +146,6 @@
   .ok{color:var(--ok)}
   .bad{color:var(--bad)}
 
-  .small{
-    opacity:.88;
-    font-size:.95rem;
-  }
-
   .flash{
     position:fixed;
     inset:0;
@@ -480,6 +475,13 @@
 
 <script>
   let rainInterval = null;
+  let fireworksVibrationInterval = null;
+
+  function vibrate(pattern){
+    if(navigator.vibrate){
+      navigator.vibrate(pattern);
+    }
+  }
 
   function goTo(id){
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -493,7 +495,9 @@
   }
 
   function startGame(){
+    vibrate(50);
     goTo('screen1');
+
     const music = document.getElementById('music');
     music.volume = 0.4;
     music.currentTime = 0;
@@ -504,6 +508,7 @@
     const ok = document.getElementById('r1').value.trim() === '279';
     setResult('res1', ok);
     if(ok){
+      vibrate(100);
       setTimeout(() => goTo('screen2'), 450);
     }
   }
@@ -512,6 +517,7 @@
     const ok = document.getElementById('r2').value.trim() === '127';
     setResult('res2', ok);
     if(ok){
+      vibrate(100);
       setTimeout(() => goTo('screen3'), 450);
     }
   }
@@ -520,6 +526,7 @@
     const ok = document.getElementById('r3').value.trim() === '5';
     setResult('res3', ok);
     if(ok){
+      vibrate(120);
       setTimeout(() => goTo('screen4'), 450);
     }
   }
@@ -564,6 +571,27 @@
     rainInterval = setInterval(addBill, 220);
   }
 
+  function startFireworksVibration(){
+    if(fireworksVibrationInterval) return;
+
+    const pulses = [
+      [40],
+      [30, 40, 30],
+      [50, 30, 50],
+      [25, 20, 25, 20, 25]
+    ];
+
+    let count = 0;
+    fireworksVibrationInterval = setInterval(() => {
+      vibrate(pulses[count % pulses.length]);
+      count++;
+      if(count > 8){
+        clearInterval(fireworksVibrationInterval);
+        fireworksVibrationInterval = null;
+      }
+    }, 180);
+  }
+
   function openChest(){
     const code = document.getElementById('code').value.trim();
     if(code !== '147'){
@@ -582,6 +610,8 @@
     setTimeout(() => {
       chest.classList.add('open');
 
+      vibrate([200,100,200,100,400]);
+
       chestSound.volume = 0.9;
       chestSound.currentTime = 0;
       chestSound.play().catch(() => {});
@@ -589,6 +619,7 @@
       flash();
       spawnParticles(80, 'particle', 700, 700);
       spawnParticles(55, 'firework', 900, 900);
+      startFireworksVibration();
     }, 500);
 
     setTimeout(() => {
