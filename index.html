@@ -491,8 +491,10 @@
   let fireworksVibrationInterval = null;
 
   function vibrate(pattern){
-    if(navigator.vibrate){
+    if ("vibrate" in navigator) {
       navigator.vibrate(pattern);
+    } else if ("webkitVibrate" in navigator) {
+      navigator.webkitVibrate(pattern);
     }
   }
 
@@ -522,7 +524,7 @@
   }
 
   function startGame(){
-    vibrate(50);
+    vibrate([50,30,50]);
     goTo('screen1');
 
     const music = document.getElementById('music');
@@ -535,11 +537,11 @@
     const ok = document.getElementById('r1').value.trim() === '279';
     setResult('res1', ok);
     if(ok){
-      vibrate(100);
+      vibrate([80]);
       playSuccess();
       setTimeout(() => goTo('screen2'), 550);
     } else {
-      vibrate(180);
+      vibrate([120,60,120]);
       playError();
     }
   }
@@ -548,11 +550,11 @@
     const ok = document.getElementById('r2').value.trim() === '127';
     setResult('res2', ok);
     if(ok){
-      vibrate(100);
+      vibrate([80]);
       playSuccess();
       setTimeout(() => goTo('screen3'), 550);
     } else {
-      vibrate(180);
+      vibrate([120,60,120]);
       playError();
     }
   }
@@ -561,11 +563,11 @@
     const ok = document.getElementById('r3').value.trim() === '5';
     setResult('res3', ok);
     if(ok){
-      vibrate(120);
+      vibrate([100]);
       playSuccess();
       setTimeout(() => goTo('screen4'), 550);
     } else {
-      vibrate(180);
+      vibrate([120,60,120]);
       playError();
     }
   }
@@ -614,10 +616,10 @@
     if(fireworksVibrationInterval) return;
 
     const pulses = [
-      [40],
-      [30, 40, 30],
-      [50, 30, 50],
-      [25, 20, 25, 20, 25]
+      [35],
+      [25, 25, 25],
+      [40, 25, 40],
+      [20, 15, 20, 15, 20]
     ];
 
     let count = 0;
@@ -635,7 +637,7 @@
     const code = document.getElementById('code').value.trim();
     if(code !== '147'){
       setResult('finalResult', false, '✔ Código correcto', '✖ Código incorrecto');
-      vibrate(220);
+      vibrate([150,80,150]);
       playError();
       return;
     }
@@ -651,7 +653,8 @@
     setTimeout(() => {
       chest.classList.add('open');
 
-      vibrate([200,100,200,100,400]);
+      // vibración épica del cofre
+      vibrate([200,100,200,100,450]);
 
       chestSound.volume = 0.9;
       chestSound.currentTime = 0;
