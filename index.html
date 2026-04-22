@@ -481,25 +481,14 @@
 </section>
 
 <audio id="music" src="inicio.mp3" loop></audio>
-<audio id="music2" src="final.mp3"></audio>
+<audio id="music2" src="final.mp3" preload="auto"></audio>
 <audio id="chestSound" src="cofre.mp3"></audio>
 <audio id="successSound" src="acierto.wav"></audio>
+<audio id="errorSound" src="error.wav"></audio>
 
 <script>
   let rainInterval = null;
   let fireworksVibrationInterval = null;
-  let successLevel = 0;
-  let audioCtx = null;
-
-  function ensureAudioContext(){
-    if(!audioCtx){
-      const Ctx = window.AudioContext || window.webkitAudioContext;
-      if(Ctx) audioCtx = new Ctx();
-    }
-    if(audioCtx && audioCtx.state === 'suspended'){
-      audioCtx.resume();
-    }
-  }
 
   function vibrate(pattern){
     if(navigator.vibrate){
@@ -507,66 +496,18 @@
     }
   }
 
-  function playError(){
-    ensureAudioContext();
-    if(!audioCtx) return;
-
-    const now = audioCtx.currentTime;
-
-    const osc1 = audioCtx.createOscillator();
-    const gain1 = audioCtx.createGain();
-    osc1.type = 'sawtooth';
-    osc1.frequency.setValueAtTime(220, now);
-    osc1.frequency.exponentialRampToValueAtTime(140, now + 0.18);
-    gain1.gain.setValueAtTime(0.0001, now);
-    gain1.gain.exponentialRampToValueAtTime(0.09, now + 0.01);
-    gain1.gain.exponentialRampToValueAtTime(0.0001, now + 0.2);
-    osc1.connect(gain1).connect(audioCtx.destination);
-    osc1.start(now);
-    osc1.stop(now + 0.21);
-
-    const osc2 = audioCtx.createOscillator();
-    const gain2 = audioCtx.createGain();
-    osc2.type = 'triangle';
-    osc2.frequency.setValueAtTime(180, now + 0.08);
-    osc2.frequency.exponentialRampToValueAtTime(120, now + 0.26);
-    gain2.gain.setValueAtTime(0.0001, now + 0.08);
-    gain2.gain.exponentialRampToValueAtTime(0.06, now + 0.1);
-    gain2.gain.exponentialRampToValueAtTime(0.0001, now + 0.28);
-    osc2.connect(gain2).connect(audioCtx.destination);
-    osc2.start(now + 0.08);
-    osc2.stop(now + 0.29);
+  function playSuccess(){
+    const s = document.getElementById('successSound');
+    s.volume = 0.85;
+    s.currentTime = 0;
+    s.play().catch(() => {});
   }
 
-  function playSuccess(level){
-    const s = document.getElementById('successSound');
-
-    let v1 = 0.8, v2 = 0.6, v3 = 0.35;
-    let d1 = 120, d2 = 260;
-
-    if(level === 2){
-      v1 = 0.85; v2 = 0.68; v3 = 0.42;
-      d1 = 110; d2 = 240;
-    } else if(level >= 3){
-      v1 = 0.95; v2 = 0.78; v3 = 0.5;
-      d1 = 95; d2 = 210;
-    }
-
+  function playError(){
+    const s = document.getElementById('errorSound');
+    s.volume = 0.9;
     s.currentTime = 0;
-    s.volume = v1;
     s.play().catch(() => {});
-
-    setTimeout(() => {
-      s.currentTime = 0;
-      s.volume = v2;
-      s.play().catch(() => {});
-    }, d1);
-
-    setTimeout(() => {
-      s.currentTime = 0;
-      s.volume = v3;
-      s.play().catch(() => {});
-    }, d2);
   }
 
   function goTo(id){
@@ -581,7 +522,6 @@
   }
 
   function startGame(){
-    ensureAudioContext();
     vibrate(50);
     goTo('screen1');
 
@@ -595,12 +535,11 @@
     const ok = document.getElementById('r1').value.trim() === '279';
     setResult('res1', ok);
     if(ok){
-      successLevel = 1;
       vibrate(100);
-      playSuccess(successLevel);
+      playSuccess();
       setTimeout(() => goTo('screen2'), 550);
     } else {
-      vibrate([70,40,70]);
+      vibrate(180);
       playError();
     }
   }
@@ -609,12 +548,11 @@
     const ok = document.getElementById('r2').value.trim() === '127';
     setResult('res2', ok);
     if(ok){
-      successLevel = 2;
       vibrate(100);
-      playSuccess(successLevel);
+      playSuccess();
       setTimeout(() => goTo('screen3'), 550);
     } else {
-      vibrate([70,40,70]);
+      vibrate(180);
       playError();
     }
   }
@@ -623,12 +561,11 @@
     const ok = document.getElementById('r3').value.trim() === '5';
     setResult('res3', ok);
     if(ok){
-      successLevel = 3;
       vibrate(120);
-      playSuccess(successLevel);
+      playSuccess();
       setTimeout(() => goTo('screen4'), 550);
     } else {
-      vibrate([70,40,70]);
+      vibrate(180);
       playError();
     }
   }
@@ -698,7 +635,7 @@
     const code = document.getElementById('code').value.trim();
     if(code !== '147'){
       setResult('finalResult', false, '✔ Código correcto', '✖ Código incorrecto');
-      vibrate([90,50,90]);
+      vibrate(220);
       playError();
       return;
     }
@@ -728,11 +665,27 @@
 
     setTimeout(() => {
       music.pause();
+
+      music2.pause();
       music2.volume = 0.7;
-      music2.currentTime = 28;
-      music2.play().catch(() => {});
+      music2.currentTime = 0;
+      music2.load();
+
       goTo('screen6');
       startInfiniteRain();
+
+      const tryPlayFinal = () => {
+        music2.currentTime = 28;
+        music2.play().catch(() => {
+          console.log('No se pudo reproducir final.mp3');
+        });
+      };
+
+      if (music2.readyState >= 2) {
+        tryPlayFinal();
+      } else {
+        music2.addEventListener('loadeddata', tryPlayFinal, { once: true });
+      }
     }, 2200);
   }
 </script>
