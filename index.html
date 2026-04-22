@@ -18,6 +18,11 @@
 
   *{box-sizing:border-box}
 
+  html,body{
+    width:100%;
+    height:100%;
+  }
+
   body{
     margin:0;
     min-height:100vh;
@@ -50,7 +55,7 @@
   }
 
   .panel{
-    width:min(920px, 100%);
+    width:min(940px, 100%);
     max-height:92vh;
     overflow:auto;
     background:var(--panel);
@@ -81,8 +86,13 @@
   p{
     line-height:1.8;
     margin:14px auto;
-    max-width:720px;
+    max-width:740px;
     font-size:1.05rem;
+  }
+
+  .lead{
+    font-size:1.08rem;
+    opacity:.96;
   }
 
   .question-box{
@@ -118,6 +128,7 @@
     border-radius:12px;
     font-size:1rem;
     text-align:center;
+    outline:none;
   }
 
   button{
@@ -362,7 +373,7 @@
 <section id="intro" class="screen active">
   <div class="panel">
     <h1>🌍 Escape Room de Luna de Miel</h1>
-    <p>Dos destinos, dos mundos… y una historia que apenas comienza.</p>
+    <p class="lead">Dos destinos, dos mundos… y una historia que apenas comienza.</p>
     <p>Vuestra luna de miel no será solo un viaje, sino una aventura. Una búsqueda. Un pequeño desafío antes del gran tesoro.</p>
     <p>Desde los rascacielos de Nueva York hasta los misterios ocultos en México, cada paso os acercará al premio final.</p>
     <p>Pero no será fácil… Tendréis que pensar, investigar y confiar el uno en el otro.</p>
@@ -472,15 +483,90 @@
 <audio id="music" src="inicio.mp3" loop></audio>
 <audio id="music2" src="final.mp3"></audio>
 <audio id="chestSound" src="cofre.mp3"></audio>
+<audio id="successSound" src="acierto.wav"></audio>
 
 <script>
   let rainInterval = null;
   let fireworksVibrationInterval = null;
+  let successLevel = 0;
+  let audioCtx = null;
+
+  function ensureAudioContext(){
+    if(!audioCtx){
+      const Ctx = window.AudioContext || window.webkitAudioContext;
+      if(Ctx) audioCtx = new Ctx();
+    }
+    if(audioCtx && audioCtx.state === 'suspended'){
+      audioCtx.resume();
+    }
+  }
 
   function vibrate(pattern){
     if(navigator.vibrate){
       navigator.vibrate(pattern);
     }
+  }
+
+  function playError(){
+    ensureAudioContext();
+    if(!audioCtx) return;
+
+    const now = audioCtx.currentTime;
+
+    const osc1 = audioCtx.createOscillator();
+    const gain1 = audioCtx.createGain();
+    osc1.type = 'sawtooth';
+    osc1.frequency.setValueAtTime(220, now);
+    osc1.frequency.exponentialRampToValueAtTime(140, now + 0.18);
+    gain1.gain.setValueAtTime(0.0001, now);
+    gain1.gain.exponentialRampToValueAtTime(0.09, now + 0.01);
+    gain1.gain.exponentialRampToValueAtTime(0.0001, now + 0.2);
+    osc1.connect(gain1).connect(audioCtx.destination);
+    osc1.start(now);
+    osc1.stop(now + 0.21);
+
+    const osc2 = audioCtx.createOscillator();
+    const gain2 = audioCtx.createGain();
+    osc2.type = 'triangle';
+    osc2.frequency.setValueAtTime(180, now + 0.08);
+    osc2.frequency.exponentialRampToValueAtTime(120, now + 0.26);
+    gain2.gain.setValueAtTime(0.0001, now + 0.08);
+    gain2.gain.exponentialRampToValueAtTime(0.06, now + 0.1);
+    gain2.gain.exponentialRampToValueAtTime(0.0001, now + 0.28);
+    osc2.connect(gain2).connect(audioCtx.destination);
+    osc2.start(now + 0.08);
+    osc2.stop(now + 0.29);
+  }
+
+  function playSuccess(level){
+    const s = document.getElementById('successSound');
+
+    let v1 = 0.8, v2 = 0.6, v3 = 0.35;
+    let d1 = 120, d2 = 260;
+
+    if(level === 2){
+      v1 = 0.85; v2 = 0.68; v3 = 0.42;
+      d1 = 110; d2 = 240;
+    } else if(level >= 3){
+      v1 = 0.95; v2 = 0.78; v3 = 0.5;
+      d1 = 95; d2 = 210;
+    }
+
+    s.currentTime = 0;
+    s.volume = v1;
+    s.play().catch(() => {});
+
+    setTimeout(() => {
+      s.currentTime = 0;
+      s.volume = v2;
+      s.play().catch(() => {});
+    }, d1);
+
+    setTimeout(() => {
+      s.currentTime = 0;
+      s.volume = v3;
+      s.play().catch(() => {});
+    }, d2);
   }
 
   function goTo(id){
@@ -495,6 +581,7 @@
   }
 
   function startGame(){
+    ensureAudioContext();
     vibrate(50);
     goTo('screen1');
 
@@ -508,8 +595,13 @@
     const ok = document.getElementById('r1').value.trim() === '279';
     setResult('res1', ok);
     if(ok){
+      successLevel = 1;
       vibrate(100);
-      setTimeout(() => goTo('screen2'), 450);
+      playSuccess(successLevel);
+      setTimeout(() => goTo('screen2'), 550);
+    } else {
+      vibrate([70,40,70]);
+      playError();
     }
   }
 
@@ -517,8 +609,13 @@
     const ok = document.getElementById('r2').value.trim() === '127';
     setResult('res2', ok);
     if(ok){
+      successLevel = 2;
       vibrate(100);
-      setTimeout(() => goTo('screen3'), 450);
+      playSuccess(successLevel);
+      setTimeout(() => goTo('screen3'), 550);
+    } else {
+      vibrate([70,40,70]);
+      playError();
     }
   }
 
@@ -526,8 +623,13 @@
     const ok = document.getElementById('r3').value.trim() === '5';
     setResult('res3', ok);
     if(ok){
+      successLevel = 3;
       vibrate(120);
-      setTimeout(() => goTo('screen4'), 450);
+      playSuccess(successLevel);
+      setTimeout(() => goTo('screen4'), 550);
+    } else {
+      vibrate([70,40,70]);
+      playError();
     }
   }
 
@@ -596,6 +698,8 @@
     const code = document.getElementById('code').value.trim();
     if(code !== '147'){
       setResult('finalResult', false, '✔ Código correcto', '✖ Código incorrecto');
+      vibrate([90,50,90]);
+      playError();
       return;
     }
 
@@ -625,7 +729,7 @@
     setTimeout(() => {
       music.pause();
       music2.volume = 0.7;
-      music2.currentTime = 0;
+      music2.currentTime = 28;
       music2.play().catch(() => {});
       goTo('screen6');
       startInfiniteRain();
