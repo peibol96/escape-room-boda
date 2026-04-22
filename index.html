@@ -669,23 +669,13 @@
       music2.pause();
       music2.volume = 0.7;
       music2.currentTime = 0;
-      music2.load();
 
       goTo('screen6');
       startInfiniteRain();
 
-      const tryPlayFinal = () => {
-        music2.currentTime = 28;
-        music2.play().catch(() => {
-          console.log('No se pudo reproducir final.mp3');
-        });
-      };
-
-      if (music2.readyState >= 2) {
-        tryPlayFinal();
-      } else {
-        music2.addEventListener('loadeddata', tryPlayFinal, { once: true });
-      }
+      music2.play().catch(() => {
+        console.log('No se pudo reproducir final.mp3');
+      });
     }, 2200);
   }
 </script>
